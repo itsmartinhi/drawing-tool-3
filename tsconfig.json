@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "es6",
+    "lib": ["es2017", "dom"], // if stuff starts to break, this is likely the cause
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,55 @@
+.tools {
+    width: 100px;
+    float: left;
+    padding: 5px;
+}
+
+.tools li {
+    padding: 5px;
+    list-style: none;
+}
+
+.tools li:hover {
+    color: cornflowerblue;
+    cursor: pointer;
+}
+
+.tools li.marked {
+    background-color: cornflowerblue;
+    color: white;
+}
+
+#drawArea {
+    border:1px solid #000000;
+    background-color: lightgrey;
+}
+
+/* MENU STYLES */
+
+.menu-container {
+    min-width: 200px;
+    min-height: 50px;
+    background-color: white;
+    border: 1px solid #2e2e2e;
+    border-radius: 10px;
+    padding: 5px;
+    box-shadow: 5px 5px 10px #8080804f;
+}
+
+.menu-item {
+    background-color: white;
+    border: 1px solid #2e2e2e;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px;
+}
+
+.menu-item:hover, .button:hover {
+    background-color: #ffe9c2;
+}
+
+.menu-seperator {
+    width: 100% - 10px;
+    border-top: 1px solid #2e2e2e;
+    margin: 0 5px;
+}
