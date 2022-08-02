@@ -10,7 +10,7 @@ app.get('/*/canvas/:id', (req, res) => {
     res.send(`Ich bin eine Canvasseite mit der ID: ${id}!`)
 })
 
-app.get('*', (req, res, next) => {
+app.get('*', (req, res) => {
     res.send(`Ich bin eine Übersichtsseite`)
 })
 
