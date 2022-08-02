@@ -5,16 +5,16 @@
   "name": "drawing-tool-3",
   "description": "## How to use",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "devDependencies": {
     "@types/node": "^18.6.3",
     "nodemon": "^2.0.19",
     "typescript": "^4.7.4"
   },
   "scripts": {
-    "dev": "npx tsc && nodemon app.js",
+    "dev": "npx tsc && nodemon server.js",
     "build": "npx tsc",
-    "start": "node app.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
