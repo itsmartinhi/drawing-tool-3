@@ -1,12 +1,12 @@
 import Color from "./Color.js";
-import { createIndexSignature } from "./node_modules/typescript/lib/typescript.js";
+import { createIndexSignature } from "../../node_modules/typescript/lib/typescript.js";
 import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 
 class Point2D {
     constructor(readonly x: number, readonly y: number) { }
 }
 
-class Vector extends Point2D {}
+class Vector extends Point2D { }
 
 class AbstractShape {
     private static counter: number = 0;
