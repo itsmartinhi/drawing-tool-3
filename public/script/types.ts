@@ -1,5 +1,9 @@
 import Color from "./Color.js";
 
+export interface IEvent {
+    readonly name: string;
+}
+
 export interface Shape {
     readonly id: number;
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean);

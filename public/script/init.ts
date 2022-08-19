@@ -63,6 +63,6 @@ function init() {
     canvas.draw();
 }
 
-console.log("RUNNING...");
+console.log("RUNNING! ...");
 
 init();
