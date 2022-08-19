@@ -1,6 +1,8 @@
+import { AddShapeEvent } from './events/events.js';
 import Color from "./Color.js";
 import { createIndexSignature } from "../../node_modules/typescript/lib/typescript.js";
 import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
+import EventManager from "./events/EventManager.js";
 
 class Point2D {
     constructor(readonly x: number, readonly y: number) { }
@@ -29,7 +31,7 @@ abstract class AbstractFactory<T extends Shape> {
     private tmpTo: Point2D;
     private tmpShape: T;
 
-    constructor(readonly shapeManager: ShapeManager) { }
+    constructor(readonly shapeManager: ShapeManager, readonly eventManager?: EventManager) { }
 
     abstract createShape(from: Point2D, to: Point2D): T;
 
@@ -42,7 +44,20 @@ abstract class AbstractFactory<T extends Shape> {
         if (this.tmpShape) {
             this.shapeManager.removeShapeWithId(this.tmpShape.id, false);
         }
-        this.shapeManager.addShape(this.createShape(this.from, new Point2D(x, y)));
+        const shape = this.createShape(this.from, new Point2D(x, y));
+        this.shapeManager.addShape(shape);
+        const to = new Point2D(x, y);
+
+        if (this.eventManager) {
+            this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+                from: this.from,
+                to: to,
+                // zOrder: 1337, // TODO: implement
+                fillColor: shape.fillColor,
+                outlineColor: shape.outlineColor,
+            }));
+        }
+
         this.from = undefined;
 
     }
@@ -66,6 +81,7 @@ abstract class AbstractFactory<T extends Shape> {
 
 }
 export class Line extends AbstractShape implements Shape {
+    public type = "line";
     private selectionTolerance: number = 10; // 10px tolernance
 
     constructor(readonly from: Point2D, readonly to: Point2D) {
@@ -107,8 +123,8 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 
     public label: string = "Linie";
 
-    constructor(shapeManager: ShapeManager) {
-        super(shapeManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
+        super(shapeManager, eventManager);
     }
 
     createShape(from: Point2D, to: Point2D): Line {
@@ -117,6 +133,7 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 
 }
 class Circle extends AbstractShape implements Shape {
+    public type = "circle";
     constructor(readonly center: Point2D, readonly radius: number) {
         super();
     }
@@ -148,8 +165,8 @@ class Circle extends AbstractShape implements Shape {
 export class CircleFactory extends AbstractFactory<Circle> implements ShapeFactory {
     public label: string = "Kreis";
 
-    constructor(shapeManager: ShapeManager) {
-        super(shapeManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
+        super(shapeManager, eventManager);
     }
 
     createShape(from: Point2D, to: Point2D): Circle {
@@ -163,6 +180,7 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
     }
 }
 class Rectangle extends AbstractShape implements Shape {
+    public type = "rectangle";
     constructor(readonly from: Point2D, readonly to: Point2D) {
         super();
     }
@@ -170,7 +188,6 @@ class Rectangle extends AbstractShape implements Shape {
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
         ctx.strokeStyle = this.outlineColor.getRGBAString();
         ctx.fillStyle = this.fillColor.getRGBAString();
-        console.log(this.fillColor.getRGBAString());
         ctx.beginPath();
         ctx.rect(this.from.x, this.from.y,
             this.to.x - this.from.x, this.to.y - this.from.y);
@@ -236,8 +253,8 @@ class Rectangle extends AbstractShape implements Shape {
 }
 export class RectangleFactory extends AbstractFactory<Rectangle> implements ShapeFactory {
     public label: string = "Rechteck";
-    constructor(shapeManager: ShapeManager) {
-        super(shapeManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
+        super(shapeManager, eventManager);
     }
 
     createShape(from: Point2D, to: Point2D): Rectangle {
@@ -245,7 +262,7 @@ export class RectangleFactory extends AbstractFactory<Rectangle> implements Shap
     }
 }
 class Triangle extends AbstractShape implements Shape {
-
+    public type = "triangle";
     constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D) {
         super();
     }

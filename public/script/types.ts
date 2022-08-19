@@ -2,10 +2,12 @@ import Color from "./Color.js";
 
 export interface IEvent {
     readonly name: string;
+    readonly payload: object;
 }
 
 export interface Shape {
     readonly id: number;
+    readonly type: string;
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean);
     isPointInShapeArea(x: number, y: number);
 

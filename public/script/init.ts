@@ -2,6 +2,7 @@ import { ShapeFactory, ShapeManager } from "./types.js";
 import { CircleFactory, LineFactory, RectangleFactory, TriangleFactory } from "./Shapes.js";
 import { SelectorFactory, ToolArea } from "./ToolArea.js";
 import { Canvas } from "./Canvas.js";
+import EventManager from "./events/EventManager.js";
 
 function init() {
     const canvasDomElm = document.getElementById("drawArea") as HTMLCanvasElement;
@@ -13,6 +14,7 @@ function init() {
     // selected.
     // Anyway, we do not want the two to have references on each other
     let canvas: Canvas;
+    const em: EventManager = new EventManager();
     const sm: ShapeManager = {
         addShape(s, rd) {
             return canvas.addShape(s, rd);
@@ -52,9 +54,9 @@ function init() {
         },
     };
     const shapesSelector: ShapeFactory[] = [
-        new LineFactory(sm),
-        new CircleFactory(sm),
-        new RectangleFactory(sm),
+        new LineFactory(sm, em),
+        new CircleFactory(sm, em),
+        new RectangleFactory(sm, em),
         new TriangleFactory(sm),
         new SelectorFactory(sm),
     ];
