@@ -16,6 +16,9 @@ function init() {
     let canvas: Canvas;
     const em: EventManager = new EventManager();
     const sm: ShapeManager = {
+        draw() {
+            return canvas.draw();
+        },
         addShape(s, rd) {
             return canvas.addShape(s, rd);
         },
@@ -57,11 +60,11 @@ function init() {
         new LineFactory(sm, em),
         new CircleFactory(sm, em),
         new RectangleFactory(sm, em),
-        new TriangleFactory(sm),
-        new SelectorFactory(sm),
+        new TriangleFactory(sm, em),
+        new SelectorFactory(sm, em),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-    canvas = new Canvas(canvasDomElm, toolArea);
+    canvas = new Canvas(canvasDomElm, toolArea, em);
     canvas.draw();
 }
 

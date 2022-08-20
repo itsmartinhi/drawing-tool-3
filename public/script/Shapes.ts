@@ -42,7 +42,7 @@ abstract class AbstractFactory<T extends Shape> {
     handleMouseUp(x: number, y: number) {
         // remove the temp line, if there was one
         if (this.tmpShape) {
-            this.shapeManager.removeShapeWithId(this.tmpShape.id, false);
+            this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
         }
         const shape = this.createShape(this.from, new Point2D(x, y));
         this.shapeManager.addShape(shape);
@@ -71,7 +71,7 @@ abstract class AbstractFactory<T extends Shape> {
             this.tmpTo = new Point2D(x, y);
             if (this.tmpShape) {
                 // remove the old temp line, if there was one
-                this.shapeManager.removeShapeWithId(this.tmpShape.id, false);
+                this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
             }
             // adds a new temp line
             this.tmpShape = this.createShape(this.from, new Point2D(x, y));
@@ -333,13 +333,24 @@ export class TriangleFactory implements ShapeFactory {
     private thirdPoint: Point2D;
     private tmpShape: Triangle;
 
-    constructor(readonly shapeManager: ShapeManager) { }
+    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager) { }
 
     handleMouseDown(x: number, y: number) {
         if (this.tmpShape) {
-            this.shapeManager.removeShapeWithId(this.tmpShape.id, false);
-            this.shapeManager.addShape(
-                new Triangle(this.from, this.tmpTo, new Point2D(x, y)));
+            this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
+
+            const p3 = new Point2D(x, y);
+            const shape = new Triangle(this.from, this.tmpTo, p3);
+            this.shapeManager.addShape(shape);
+
+            this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+                p1: shape.p1,
+                p2: shape.p2,
+                p3: shape.p3,
+                fillColor: shape.fillColor,
+                outlineColor: shape.outlineColor,
+            }));
+
             this.from = undefined;
             this.tmpTo = undefined;
             this.tmpLine = undefined;
@@ -353,7 +364,7 @@ export class TriangleFactory implements ShapeFactory {
     handleMouseUp(x: number, y: number) {
         // remove the temp line, if there was one
         if (this.tmpLine) {
-            this.shapeManager.removeShapeWithId(this.tmpLine.id, false);
+            this.shapeManager.removeShapeWithId(this.tmpLine.id.toString(), false);
             this.tmpLine = undefined;
             this.tmpTo = new Point2D(x, y);
             this.thirdPoint = new Point2D(x, y);
@@ -373,7 +384,7 @@ export class TriangleFactory implements ShapeFactory {
                 this.thirdPoint = new Point2D(x, y);
                 if (this.tmpShape) {
                     // remove the old temp line, if there was one
-                    this.shapeManager.removeShapeWithId(this.tmpShape.id, false);
+                    this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
                 }
                 // adds a new temp triangle
                 this.tmpShape = new Triangle(this.from, this.tmpTo, this.thirdPoint);
@@ -384,7 +395,7 @@ export class TriangleFactory implements ShapeFactory {
                 this.tmpTo = new Point2D(x, y);
                 if (this.tmpLine) {
                     // remove the old temp line, if there was one
-                    this.shapeManager.removeShapeWithId(this.tmpLine.id, false);
+                    this.shapeManager.removeShapeWithId(this.tmpLine.id.toString(), false);
                 }
                 // adds a new temp line
                 this.tmpLine = new Line(this.from, this.tmpTo);

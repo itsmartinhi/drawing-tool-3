@@ -8,13 +8,11 @@ class EventManager {
         this.updateEventstreamDisplay();
     }
 
-    public getEventStream() {
+    public getEventStream(): Array<IEvent> {
         return this.eventStream;
     }
 
     private updateEventstreamDisplay() {
-        console.log(this.getEventStream());
-
         const eventStreamString = this.getEventStream().map((event: IEvent) => {
             return `>> ${event.name} | ${JSON.stringify(event.payload)}`;
         }).join('\n');

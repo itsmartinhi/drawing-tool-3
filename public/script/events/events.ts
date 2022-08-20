@@ -9,7 +9,7 @@ import { IEvent } from '../types';
 // }
 
 export class AddShapeEvent implements IEvent {
-    public name: string = "AddShape";
+    readonly name: string = "AddShape";
     public payload: object;
     constructor(private shapeType: string, private id: string, private data: object) {
         this.payload = { shapeType, id, data };
@@ -17,23 +17,31 @@ export class AddShapeEvent implements IEvent {
 }
 
 export class RemoveShapeWithIdEvent implements IEvent {
-    public name: string = "RemoveShapeWithId";
+    readonly name: string = "RemoveShapeWithId";
     public payload: object;
     constructor(private shapeId: string) { this.payload = { shapeId } }
 }
 
 export class SelectShapeEvent implements IEvent {
-    public name: string = "SelectShape";
+    readonly name: string = "SelectShape";
     public payload: object;
     constructor(private shapeId: string, private clientId: string) {
         this.payload = { shapeId, clientId };
     }
+
+    public static getName(): string {
+        return this.name;
+    }
 }
 
 export class UnselectShapeEvent implements IEvent {
-    public name: string = "UnselectShape";
+    readonly name: string = "UnselectShape";
     public payload: object;
     constructor(private shapeId: string, private clientId: string) {
         this.payload = { shapeId, clientId };
+    }
+
+    public static getName(): string {
+        return this.name;
     }
 }

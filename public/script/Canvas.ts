@@ -1,24 +1,26 @@
-import {Shape, ShapeManager} from "./types.js";
-import {ToolArea} from "./ToolArea.js";
+import { IEvent, Shape, ShapeManager } from "./types.js";
+import { ToolArea } from "./ToolArea.js";
 import menuApi, { initContextMenu } from "./menuApi.js";
 import Color from "./Color.js";
+import EventManager from "./events/EventManager.js";
+import { AddShapeEvent, SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
 
 export class Canvas implements ShapeManager {
     private ctx: CanvasRenderingContext2D;
-    
-    private shapes: {[p: number]: Shape} = {};
-    private selectedShapeIds: Set<number> = new Set([]);
+
+    private shapes: { [p: number]: Shape } = {};
+    private selectedShapeIds: Set<string> = new Set([]);
 
     private width: number;
     private height: number;
 
     constructor(canvasDomElement: HTMLCanvasElement,
-                toolarea: ToolArea) {
-        const { width, height} = canvasDomElement.getBoundingClientRect();
+        toolarea: ToolArea, readonly eventManager: EventManager) {
+        const { width, height } = canvasDomElement.getBoundingClientRect();
         this.width = width;
         this.height = height;
         this.ctx = canvasDomElement.getContext("2d");
-        
+
         // register mouse handlers
         canvasDomElement.addEventListener("mousemove",
             createMouseHandler("handleMouseMove"));
@@ -26,7 +28,7 @@ export class Canvas implements ShapeManager {
             createMouseHandler("handleMouseDown"));
         canvasDomElement.addEventListener("mouseup",
             createMouseHandler("handleMouseUp"));
-        
+
         // register key handlers (the canvas needs a tabindex in order to get focus to recieve key events)
         canvasDomElement.addEventListener("keydown",
             createKeyHandler("handleKeyDown"));
@@ -100,10 +102,30 @@ export class Canvas implements ShapeManager {
         this.ctx.fillRect(0, 0, this.width, this.height);
         this.ctx.stroke();
 
+        // parse events
+        this.eventManager.getEventStream().forEach((event: IEvent) => {
+            if (event.name === "SelectShape") {
+                this.selectedShapeIds.add(event.payload.shapeId);
+            }
+
+            if (event.name === "UnselectShape") {
+                this.selectedShapeIds.delete(event.payload.shapeId);
+            }
+
+            if (event.name === "AddShape") {
+
+            }
+
+            if (event.name === "RemoveShapeWithId") {
+
+            }
+        });
+
         // draw shapes
         this.ctx.fillStyle = 'black';
         for (let id in this.shapes) {
-            const isSelected = this.selectedShapeIds.has(parseInt(id));
+            const isSelected = this.selectedShapeIds.has(id);
+
             this.shapes[id].draw(this.ctx, isSelected);
         }
         return this;
@@ -116,18 +138,18 @@ export class Canvas implements ShapeManager {
 
     removeShape(shape: Shape, redraw: boolean = true): this {
         const id = shape.id;
-        delete  this.shapes[id];
+        delete this.shapes[id];
         return redraw ? this.draw() : this;
     }
 
-    removeShapeWithId(id: number, redraw: boolean = true): this {
-        delete  this.shapes[id];
+    removeShapeWithId(id: string, redraw: boolean = true): this {
+        delete this.shapes[id];
         return redraw ? this.draw() : this;
     }
 
     // shape selection
 
-    getShapeIdsAtPoint(x: number, y: number): number[] {
+    getShapeIdsAtPoint(x: number, y: number): string[] {
         const Ids = [];
 
         // iterate through all shapes on the canvas
@@ -135,7 +157,7 @@ export class Canvas implements ShapeManager {
 
             // get the current shape by id
             const shape = this.shapes[id];
-            
+
             // if the point is within the shape area, add it the the id list
             if (shape.isPointInShapeArea(x, y)) {
                 Ids.push(parseInt(id));
@@ -143,11 +165,11 @@ export class Canvas implements ShapeManager {
         }
 
         // console.log(Ids) // TODO: remove this logging
-      
+
         return Ids
     }
 
-    selectShapeWithId(id: number, redraw?: boolean): this {
+    selectShapeWithId(id: string, redraw?: boolean): this {
         this.selectedShapeIds.add(id);
         return redraw ? this.draw() : this;
     }
@@ -157,7 +179,7 @@ export class Canvas implements ShapeManager {
         return redraw ? this.draw() : this;
     }
 
-    getSelectedShapeIds(): Set<number> {
+    getSelectedShapeIds(): Set<string> {
         return this.selectedShapeIds;
     }
 
@@ -173,7 +195,7 @@ export class Canvas implements ShapeManager {
         this.selectedShapeIds.forEach((id) => {
             this.shapes[id].outlineColor = color;
         });
-        return redraw ? this.draw() : this; 
+        return redraw ? this.draw() : this;
     }
 
     setFillColorForSelectedShapes(color: Color, redraw?: boolean): this {
