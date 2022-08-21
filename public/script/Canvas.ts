@@ -136,7 +136,8 @@ export class Canvas implements ShapeManager {
             }
 
             if (event.name === "RemoveShapeWithId") {
-
+                const { shapeId } = event.payload;
+                delete this.shapes[shapeId];
             }
         });
 
@@ -204,7 +205,8 @@ export class Canvas implements ShapeManager {
 
     removeSelectedShapes(): this {
         this.selectedShapeIds.forEach((id) => {
-            this.removeShapeWithId(id, false);
+            this.eventManager.pushEvent(new RemoveShapeWithIdEvent(id));
+            // this.removeShapeWithId(id, false);
         });
         return this.draw();
     }
