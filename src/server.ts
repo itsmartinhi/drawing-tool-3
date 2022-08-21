@@ -5,7 +5,7 @@ const path = require('path');
 const app = express()
 app.use(express.json());
 app.use(express.static("express"));
-app.use(express.static("public"));
+app.use("/static", express.static(path.join(__dirname, "../frontend/static")));
 
 // this is probably not needed because we are building a spa
 // app.get('/*/canvas/:id', (req, res) => {
@@ -14,7 +14,7 @@ app.use(express.static("public"));
 // })
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
     // res.send(`Ich bin eine Übersichtsseite`)
 })
 

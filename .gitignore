@@ -2,8 +2,8 @@ node_modules
 
 todo.md
 
-public/**/*.js
-public/**/*.js.map
+frontend/**/*.js
+frontend/**/*.js.map
 
 src/*.js
 src/*.js.map

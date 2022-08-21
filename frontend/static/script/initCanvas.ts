@@ -117,10 +117,9 @@ function buildDOM() {
     eventStreamContainer.appendChild(eventStreamLoadButton);
     elementList.push(eventStreamContainer);
 
-    // add everything to the body
+    // add everything to the root element
+    const rootEle = document.getElementById("root")
     elementList.forEach(element => {
-        document.body.appendChild(element);
+        rootEle.appendChild(element);
     });
 }
-
-initCanvas();

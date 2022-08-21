@@ -1,6 +1,6 @@
 import { AddShapeEvent } from './events/events.js';
 import Color from "./Color.js";
-import { createIndexSignature } from "../../node_modules/typescript/lib/typescript.js";
+import { createIndexSignature } from "../../../node_modules/typescript/lib/typescript.js";
 import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 import EventManager from "./events/EventManager.js";
 
