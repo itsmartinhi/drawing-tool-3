@@ -1,4 +1,5 @@
 import initCanvas from "./initCanvas.js";
+import initOverview from "./initOverview.js";
 
 export default class Router {
     private static getCurrentUrl(): string {
@@ -9,14 +10,15 @@ export default class Router {
         const re = new RegExp("https?:\/\/(.*)");
         const matches = Router.getCurrentUrl().match(re);
 
-        console.log(matches);
+        const urlParts = matches[1].split("/");
 
-        if (false) {
+        const canvasIndex = urlParts.indexOf("canvas");
+        // greater 0 because the first urlPart is the domain
+        if (canvasIndex > 0 && urlParts[canvasIndex + 1]) {
+            const canvasId = urlParts[canvasIndex + 1];
             return initCanvas();
         }
 
-        return; // TODO: add initOverview
+        return initOverview();
     }
-
-
 }

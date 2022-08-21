@@ -86,3 +86,27 @@ body {
     border-top: 1px solid #2e2e2e;
     margin: 0 5px;
 }
+
+/* OVERVIEW STYLES */
+
+#canvas-button-container {
+    display: flex;
+}
+
+.canvas-button {
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 40px;
+    margin: 10px;
+    border-radius: 10px;
+    background-color: cornflowerblue;
+    border: solid 2px transparent;
+}
+
+.canvas-button:hover {
+    color: cornflowerblue;
+    border-radius: 10px;
+    background-color: rgba(100, 148, 237, 0.3);
+    border: solid 2px cornflowerblue;
+}
