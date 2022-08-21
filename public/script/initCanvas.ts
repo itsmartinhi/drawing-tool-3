@@ -4,7 +4,9 @@ import { SelectorFactory, ToolArea } from "./ToolArea.js";
 import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
 
-function init() {
+export default function initCanvas() {
+    buildDOM();
+
     const canvasDomElm = document.getElementById("drawArea") as HTMLCanvasElement;
     const menu = document.getElementsByClassName("tools");
     // Problem here: Factories needs a way to create new Shapes, so they
@@ -68,6 +70,57 @@ function init() {
     canvas.draw();
 }
 
-console.log("RUNNING! ...");
+function buildDOM() {
+    const elementList = [];
 
-init();
+    // info text
+    const infoElement = document.createElement('p');
+    infoElement.textContent = `Wählen Sie auf der linken Seite Ihr Zeichwerkzeug aus.
+    Haben Sie eines ausgewählt, können Sie mit der Maus
+    die entsprechenden Figuren zeichen. Typischerweise, indem
+    Sie die Maus drücken, dann mit gedrückter Maustaste die
+    Form bestimmen, und dann anschließend die Maustaste loslassen.`;
+    elementList.push(infoElement);
+
+    // tool list
+    const toolListElement = document.createElement('ul');
+    toolListElement.classList.add('tools');
+    elementList.push(toolListElement);
+
+    // canvas
+    const canvasElement = document.createElement('canvas');
+    canvasElement.setAttribute("id", "drawArea");
+    canvasElement.setAttribute("width", "900");
+    canvasElement.setAttribute("height", "800");
+    canvasElement.setAttribute("tabindex", "-1"); // The canvas gets a tabindex to be able to get focus (-1 doesn't put it in the tab rotation)
+    elementList.push(canvasElement);
+
+    // eventstream
+    const eventStreamContainer = document.createElement('div');
+    eventStreamContainer.setAttribute("id", "eventstream-container");
+
+    const eventStreamHeader = document.createElement('h4');
+    eventStreamHeader.textContent = "Eventstream:";
+
+    const eventStreamTextarea = document.createElement('textarea');
+    eventStreamTextarea.setAttribute("name", "eventstream");
+    eventStreamTextarea.setAttribute("id", "eventstream");
+    eventStreamTextarea.setAttribute("cols", "100");
+    eventStreamTextarea.setAttribute("rows", "10");
+
+    const eventStreamLoadButton = document.createElement('div');
+    eventStreamLoadButton.setAttribute("id", "load-events-button");
+    eventStreamLoadButton.textContent = "Load Events";
+
+    eventStreamContainer.appendChild(eventStreamHeader);
+    eventStreamContainer.appendChild(eventStreamTextarea);
+    eventStreamContainer.appendChild(eventStreamLoadButton);
+    elementList.push(eventStreamContainer);
+
+    // add everything to the body
+    elementList.forEach(element => {
+        document.body.appendChild(element);
+    });
+}
+
+initCanvas();

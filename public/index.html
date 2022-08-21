@@ -10,31 +10,13 @@
     <script src="script/Shapes.js" type="module"></script>
     <script src="script/ToolArea.js" type="module"></script>
     <script src="script/Canvas.js" type="module"></script>
-    <script src="script/init.js" type="module"></script>
+    <script src="script/initCanvas.js" type="module"></script>
 
     <script src="script/events/events.js" type="module"></script>
     <script src="script/events/EventManager.js" type="module"></script>
 
 
 <body>
-
-    <p>Wählen Sie auf der linken Seite Ihr Zeichwerkzeug aus.
-        Haben Sie eines ausgewählt, können Sie mit der Maus
-        die entsprechenden Figuren zeichen. Typischerweise, indem
-        Sie die Maus drücken, dann mit gedrückter Maustaste die
-        Form bestimmen, und dann anschließend die Maustaste loslassen.
-    </p>
-
-    <ul class="tools"></ul>
-
-    <!-- The canvas gets a tabindex to be able to get focus (-1 doesn't put it in the tab rotation)-->
-    <canvas id="drawArea" width="900" height="800" tabindex="-1"></canvas>
-
-    <div id="eventstream-container">
-        <h4>Eventstream:</h4>
-        <textarea name="eventstream" id="eventstream" cols="100" rows="10"></textarea>
-        <div id="load-events-button">Load Events</div>
-    </div>
 
 </body>
 
