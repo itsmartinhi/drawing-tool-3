@@ -3,7 +3,8 @@ import { ToolArea } from "./ToolArea.js";
 import menuApi, { initContextMenu } from "./menuApi.js";
 import Color from "./Color.js";
 import EventManager from "./events/EventManager.js";
-import { AddShapeEvent, SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
+import { AddShapeEvent, RemoveShapeWithIdEvent, SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
+import { Circle, CircleFactory, Line, LineFactory, Rectangle, RectangleFactory, Triangle, TriangleFactory } from "./Shapes.js";
 
 export class Canvas implements ShapeManager {
     private ctx: CanvasRenderingContext2D;
@@ -15,7 +16,7 @@ export class Canvas implements ShapeManager {
     private height: number;
 
     constructor(canvasDomElement: HTMLCanvasElement,
-        toolarea: ToolArea, readonly eventManager: EventManager) {
+        toolarea: ToolArea, readonly eventManager: EventManager, readonly shapeManager: ShapeManager) {
         const { width, height } = canvasDomElement.getBoundingClientRect();
         this.width = width;
         this.height = height;
@@ -113,7 +114,25 @@ export class Canvas implements ShapeManager {
             }
 
             if (event.name === "AddShape") {
-
+                const { shapeType, id, data } = event.payload;
+                let shape: Shape;
+                switch (shapeType) {
+                    case "line":
+                        shape = new LineFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        break;
+                    case "rectangle":
+                        shape = new RectangleFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        break;
+                    case "circle":
+                        shape = new CircleFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        break;
+                    case "triangle":
+                        shape = new Triangle(data.p1, data.p2, data.p3);
+                        break;
+                }
+                shape.fillColor = data.fillColor ?? shape.fillColor;
+                shape.outlineColor = data.outlineColor ?? shape.outlineColor;
+                this.shapes[id] = shape;
             }
 
             if (event.name === "RemoveShapeWithId") {
@@ -196,6 +215,28 @@ export class Canvas implements ShapeManager {
             this.shapes[id].outlineColor = color;
         });
         return redraw ? this.draw() : this;
+
+        // TODO: make this work
+        // this.selectedShapeIds.forEach((id) => {
+        //     const shape = this.shapes[id];
+        //     shape.outlineColor = color;
+        //     this.eventManager.pushEvent(new RemoveShapeWithIdEvent(id));
+        //     this.eventManager.pushEvent(new AddShapeEvent(
+        //         shape.type,
+        //         shape.id,
+        //         {
+        //             ...shape
+        //             // to: shape.to,
+        //             // from: shape.from,
+        //             // p1: shape.p1,
+        //             // p2: shape.p2,
+        //             // p3: shape.p3,
+        //             // fillColor: shape.fillColor,
+        //             // outlineColor: color
+        //         }
+        //     ));
+        // });
+        // return this.draw();
     }
 
     setFillColorForSelectedShapes(color: Color, redraw?: boolean): this {

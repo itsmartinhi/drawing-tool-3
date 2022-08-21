@@ -45,18 +45,17 @@ abstract class AbstractFactory<T extends Shape> {
             this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
         }
         const shape = this.createShape(this.from, new Point2D(x, y));
-        this.shapeManager.addShape(shape);
+        // this.shapeManager.addShape(shape); // TODO: remove
         const to = new Point2D(x, y);
 
-        if (this.eventManager) {
-            this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
-                from: this.from,
-                to: to,
-                // zOrder: 1337, // TODO: implement
-                fillColor: shape.fillColor,
-                outlineColor: shape.outlineColor,
-            }));
-        }
+        this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+            from: this.from,
+            to: to,
+            // zOrder: 1337, // TODO: implement
+            fillColor: shape.fillColor,
+            outlineColor: shape.outlineColor,
+        }));
+        this.shapeManager.draw();
 
         this.from = undefined;
 
@@ -132,7 +131,7 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
     }
 
 }
-class Circle extends AbstractShape implements Shape {
+export class Circle extends AbstractShape implements Shape {
     public type = "circle";
     constructor(readonly center: Point2D, readonly radius: number) {
         super();
@@ -179,7 +178,7 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
         return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
     }
 }
-class Rectangle extends AbstractShape implements Shape {
+export class Rectangle extends AbstractShape implements Shape {
     public type = "rectangle";
     constructor(readonly from: Point2D, readonly to: Point2D) {
         super();
@@ -261,7 +260,7 @@ export class RectangleFactory extends AbstractFactory<Rectangle> implements Shap
         return new Rectangle(from, to);
     }
 }
-class Triangle extends AbstractShape implements Shape {
+export class Triangle extends AbstractShape implements Shape {
     public type = "triangle";
     constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D) {
         super();
@@ -341,7 +340,7 @@ export class TriangleFactory implements ShapeFactory {
 
             const p3 = new Point2D(x, y);
             const shape = new Triangle(this.from, this.tmpTo, p3);
-            this.shapeManager.addShape(shape);
+            // this.shapeManager.addShape(shape); // TODO: remove
 
             this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
                 p1: shape.p1,
@@ -350,6 +349,7 @@ export class TriangleFactory implements ShapeFactory {
                 fillColor: shape.fillColor,
                 outlineColor: shape.outlineColor,
             }));
+            this.shapeManager.draw();
 
             this.from = undefined;
             this.tmpTo = undefined;

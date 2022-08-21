@@ -28,10 +28,6 @@ export class SelectShapeEvent implements IEvent {
     constructor(private shapeId: string, private clientId: string) {
         this.payload = { shapeId, clientId };
     }
-
-    public static getName(): string {
-        return this.name;
-    }
 }
 
 export class UnselectShapeEvent implements IEvent {
@@ -39,9 +35,5 @@ export class UnselectShapeEvent implements IEvent {
     public payload: object;
     constructor(private shapeId: string, private clientId: string) {
         this.payload = { shapeId, clientId };
-    }
-
-    public static getName(): string {
-        return this.name;
     }
 }

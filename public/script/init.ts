@@ -64,7 +64,7 @@ function init() {
         new SelectorFactory(sm, em),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-    canvas = new Canvas(canvasDomElm, toolArea, em);
+    canvas = new Canvas(canvasDomElm, toolArea, em, sm);
     canvas.draw();
 }
 
