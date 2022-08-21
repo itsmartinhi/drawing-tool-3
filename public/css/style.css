@@ -1,18 +1,26 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .tools {
-    width: 100px;
+    width: 90px;
     float: left;
     padding: 5px;
+    margin-right: 5px;
 }
 
 .tools li {
     padding: 5px 10px;
-    margin: 2px 0;
+    margin: 10px 0;
     list-style: none;
     border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 }
 
 .tools li:hover {
-    color: cornflowerblue;
+    background-color: cornflowerblue;
+    color: white;
     cursor: pointer;
 }
 
@@ -42,6 +50,10 @@
 
 #load-events-button:hover {
     background-color: rgb(137, 174, 241);
+}
+
+#eventstream-container {
+    margin: 20px;
 }
 
 /* MENU STYLES */

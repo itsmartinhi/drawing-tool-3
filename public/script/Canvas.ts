@@ -98,7 +98,7 @@ export class Canvas implements ShapeManager {
     draw(): this {
         // TODO: it there a better way to reset the canvas?
         this.ctx.beginPath();
-        this.ctx.fillStyle = 'lightgrey';
+        this.ctx.fillStyle = '#eeeeee';
         this.ctx.fillRect(0, 0, this.width, this.height);
         this.ctx.stroke();
 
