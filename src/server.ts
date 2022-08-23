@@ -21,3 +21,40 @@ app.get('*', (req, res) => {
 const server = http.createServer(app);
 const port = 3000;
 server.listen(port);
+
+
+// WEBSOCKET SERVER
+const WS = require("ws")
+const cryptoLib = require("crypto")
+const wsServer = new WS.Server({ port: "5000" });
+
+wsServer.on("connection", socket => {
+    socket.on("message", rawData => {
+        const data = JSON.parse(String(rawData));
+        console.log(data);
+        parseWsData(data);
+        // socket.send(JSON.stringify(data));
+    });
+
+    socket.on("open")
+});
+
+class Canvas {
+    constructor(public id) { }
+}
+
+const canvasStore: Array<Canvas> = [];
+
+const parseWsData = (data) => {
+    switch (data.type) {
+        case "AddCanvas":
+            const id = cryptoLib.randomBytes(20).toString('hex'); // TODO: check if id exists already and choose a new one
+            canvasStore.push(new Canvas(id));
+            console.log("Added new canvas with id: ", id);
+            break;
+
+
+        default:
+            break;
+    }
+}
