@@ -1,8 +1,9 @@
 import { AddShapeEvent } from './events/events.js';
 import Color from "./Color.js";
-import { createIndexSignature } from "../../node_modules/typescript/lib/typescript.js";
+import { createIndexSignature } from "../../../node_modules/typescript/lib/typescript.js";
 import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 import EventManager from "./events/EventManager.js";
+import WsClient from './WsClient.js';
 
 class Point2D {
     constructor(readonly x: number, readonly y: number) { }
@@ -12,14 +13,14 @@ class Vector extends Point2D { }
 
 class AbstractShape {
     private static counter: number = 0;
-    readonly id: number;
+    readonly id: string;
 
     public selectionColor: Color;
     public fillColor: Color;
     public outlineColor: Color;
 
-    constructor() {
-        this.id = AbstractShape.counter++;
+    constructor(clientId: string) {
+        this.id = clientId + "-" + String(AbstractShape.counter++);
 
         this.selectionColor = Color.BLACK;
         this.fillColor = Color.TRANSPARENT;
@@ -31,7 +32,7 @@ abstract class AbstractFactory<T extends Shape> {
     private tmpTo: Point2D;
     private tmpShape: T;
 
-    constructor(readonly shapeManager: ShapeManager, readonly eventManager?: EventManager) { }
+    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) { }
 
     abstract createShape(from: Point2D, to: Point2D): T;
 
@@ -48,13 +49,16 @@ abstract class AbstractFactory<T extends Shape> {
         // this.shapeManager.addShape(shape); // TODO: remove
         const to = new Point2D(x, y);
 
-        this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+        const event = new AddShapeEvent(shape.type, shape.id.toString(), {
             from: this.from,
             to: to,
             // zOrder: 1337, // TODO: implement
             fillColor: shape.fillColor,
             outlineColor: shape.outlineColor,
-        }));
+        });
+
+        this.eventManager.pushEvent(event);
+        this.wsClient.addCanvasEvent(this.canvasId, event);
         this.shapeManager.draw();
 
         this.from = undefined;
@@ -83,8 +87,8 @@ export class Line extends AbstractShape implements Shape {
     public type = "line";
     private selectionTolerance: number = 10; // 10px tolernance
 
-    constructor(readonly from: Point2D, readonly to: Point2D) {
-        super();
+    constructor(readonly clientId: string, readonly from: Point2D, readonly to: Point2D) {
+        super(clientId);
     }
 
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
@@ -122,19 +126,19 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 
     public label: string = "Linie";
 
-    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
-        super(shapeManager, eventManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) {
+        super(shapeManager, eventManager, wsClient, canvasId);
     }
 
     createShape(from: Point2D, to: Point2D): Line {
-        return new Line(from, to);
+        return new Line(this.wsClient.clientId, from, to);
     }
 
 }
 export class Circle extends AbstractShape implements Shape {
     public type = "circle";
-    constructor(readonly center: Point2D, readonly radius: number) {
-        super();
+    constructor(readonly clientId: string, readonly center: Point2D, readonly radius: number) {
+        super(clientId);
     }
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
         ctx.strokeStyle = this.outlineColor.getRGBAString();
@@ -164,12 +168,12 @@ export class Circle extends AbstractShape implements Shape {
 export class CircleFactory extends AbstractFactory<Circle> implements ShapeFactory {
     public label: string = "Kreis";
 
-    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
-        super(shapeManager, eventManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) {
+        super(shapeManager, eventManager, wsClient, canvasId);
     }
 
     createShape(from: Point2D, to: Point2D): Circle {
-        return new Circle(from, CircleFactory.computeRadius(from, to.x, to.y));
+        return new Circle(this.wsClient.clientId, from, CircleFactory.computeRadius(from, to.x, to.y));
     }
 
     private static computeRadius(from: Point2D, x: number, y: number): number {
@@ -180,11 +184,12 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
 }
 export class Rectangle extends AbstractShape implements Shape {
     public type = "rectangle";
-    constructor(readonly from: Point2D, readonly to: Point2D) {
-        super();
+    constructor(readonly clientId: string, readonly from: Point2D, readonly to: Point2D) {
+        super(clientId);
     }
 
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
+
         ctx.strokeStyle = this.outlineColor.getRGBAString();
         ctx.fillStyle = this.fillColor.getRGBAString();
         ctx.beginPath();
@@ -252,18 +257,18 @@ export class Rectangle extends AbstractShape implements Shape {
 }
 export class RectangleFactory extends AbstractFactory<Rectangle> implements ShapeFactory {
     public label: string = "Rechteck";
-    constructor(shapeManager: ShapeManager, eventManager: EventManager) {
-        super(shapeManager, eventManager);
+    constructor(shapeManager: ShapeManager, eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) {
+        super(shapeManager, eventManager, wsClient, canvasId);
     }
 
     createShape(from: Point2D, to: Point2D): Rectangle {
-        return new Rectangle(from, to);
+        return new Rectangle(this.wsClient.clientId, from, to);
     }
 }
 export class Triangle extends AbstractShape implements Shape {
     public type = "triangle";
-    constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D) {
-        super();
+    constructor(readonly clientId: string, readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D) {
+        super(clientId);
     }
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
         ctx.strokeStyle = this.outlineColor.getRGBAString();
@@ -332,23 +337,25 @@ export class TriangleFactory implements ShapeFactory {
     private thirdPoint: Point2D;
     private tmpShape: Triangle;
 
-    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager) { }
+    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) { }
 
     handleMouseDown(x: number, y: number) {
         if (this.tmpShape) {
             this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
 
             const p3 = new Point2D(x, y);
-            const shape = new Triangle(this.from, this.tmpTo, p3);
+            const shape = new Triangle(this.wsClient.clientId, this.from, this.tmpTo, p3);
             // this.shapeManager.addShape(shape); // TODO: remove
 
-            this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+            const event = new AddShapeEvent(shape.type, shape.id.toString(), {
                 p1: shape.p1,
                 p2: shape.p2,
                 p3: shape.p3,
                 fillColor: shape.fillColor,
                 outlineColor: shape.outlineColor,
-            }));
+            });
+            this.eventManager.pushEvent(event);
+            this.wsClient.addCanvasEvent(this.canvasId, event);
             this.shapeManager.draw();
 
             this.from = undefined;
@@ -368,7 +375,7 @@ export class TriangleFactory implements ShapeFactory {
             this.tmpLine = undefined;
             this.tmpTo = new Point2D(x, y);
             this.thirdPoint = new Point2D(x, y);
-            this.tmpShape = new Triangle(this.from, this.tmpTo, this.thirdPoint);
+            this.tmpShape = new Triangle(this.wsClient.clientId, this.from, this.tmpTo, this.thirdPoint);
             this.shapeManager.addShape(this.tmpShape);
         }
     }
@@ -387,7 +394,7 @@ export class TriangleFactory implements ShapeFactory {
                     this.shapeManager.removeShapeWithId(this.tmpShape.id.toString(), false);
                 }
                 // adds a new temp triangle
-                this.tmpShape = new Triangle(this.from, this.tmpTo, this.thirdPoint);
+                this.tmpShape = new Triangle(this.wsClient.clientId, this.from, this.tmpTo, this.thirdPoint);
                 this.shapeManager.addShape(this.tmpShape);
             }
         } else { // no second point fixed, update tmp line
@@ -398,7 +405,7 @@ export class TriangleFactory implements ShapeFactory {
                     this.shapeManager.removeShapeWithId(this.tmpLine.id.toString(), false);
                 }
                 // adds a new temp line
-                this.tmpLine = new Line(this.from, this.tmpTo);
+                this.tmpLine = new Line(this.wsClient.clientId, this.from, this.tmpTo);
                 this.shapeManager.addShape(this.tmpLine);
             }
         }

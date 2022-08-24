@@ -1,4 +1,5 @@
-import { IEvent } from "../types";
+import { IEvent } from "../types.js";
+import WsClient from "../WsClient.js";
 
 class EventManager {
     private eventStream: Array<IEvent> = [];

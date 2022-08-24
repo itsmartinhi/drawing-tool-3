@@ -2,6 +2,7 @@ import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
 import { SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
 import { ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
+import WsClient from "./WsClient.js";
 
 export class ToolArea {
     private selectedShape: ShapeFactory = undefined;
@@ -36,7 +37,7 @@ export class ToolArea {
 export class SelectorFactory implements ToolFactory {
 
     // add shapemanager to be able to manipulate the shapes on the canvas
-    constructor(private shapeManager: ShapeManager, readonly eventManager: EventManager) { }
+    constructor(private shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) { }
 
     public label: string = "Auswahl";
     private pressedKeys: Set<number> = new Set([]);
@@ -67,7 +68,9 @@ export class SelectorFactory implements ToolFactory {
         if (resetCanvas) {
             // unselect every shape the reset the canvas
             this.shapeManager.getSelectedShapeIds().forEach(shapeId => {
-                this.eventManager.pushEvent(new UnselectShapeEvent(shapeId.toString(), "i-am-a-clientid"));
+                const event = new UnselectShapeEvent(shapeId.toString(), this.wsClient.clientId);
+                this.eventManager.pushEvent(event);
+                this.wsClient.addCanvasEvent(this.canvasId, event);
             });
             this.shapeManager.draw();
             // this.shapeManager.unselectAllShapes(true); // TODO: remove after event sourcing is finalized
@@ -80,7 +83,9 @@ export class SelectorFactory implements ToolFactory {
 
         // select the element with the heightest ID (the latest ID was the last drawn shape)
         const latestId = selectableShapeIds[selectableShapeIds.length - 1];
-        this.eventManager.pushEvent(new SelectShapeEvent(latestId.toString(), "i-am-a-clientid"));
+        const event = new SelectShapeEvent(latestId.toString(), this.wsClient.clientId);
+        this.eventManager.pushEvent(event);
+        this.wsClient.addCanvasEvent(this.canvasId, event);
         this.shapeManager.draw();
         // this.shapeManager.selectShapeWithId(highestId, true); // TODO: remove after event sourcing is finalized
     }
