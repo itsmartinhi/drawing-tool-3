@@ -1,18 +1,34 @@
+import Router from "./Router.js";
 import WsClient from "./WsClient.js";
 
-export default function initOverview(wsClient: WsClient) {
-    renderDOM(wsClient);
+export default function initOverview(wsClient: WsClient, router: Router) {
+
+    // fetch available canvas ids from api and render dom
+    let availableCanvasIds: Array<string>;
+    const httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = () => {
+        if (httpRequest.readyState === XMLHttpRequest.DONE) {
+            if (httpRequest.status === 200) {
+                const data = JSON.parse(httpRequest.response);
+                availableCanvasIds = data.canvasIds ?? [];
+            } else {
+                console.error('There was a problem with the request.');
+            }
+        }
+        renderDOM(wsClient, router, availableCanvasIds);
+    };
+    httpRequest.open('GET', '/api/canvasIds');
+    httpRequest.send();
+
 }
 
-const renderDOM = (wsClient: WsClient) => {
+const renderDOM = (wsClient: WsClient, router: Router, availableCanvasIds: Array<string> = []) => {
     const rootEle = document.getElementById("root");
 
     // reset the dom
     while (rootEle.firstChild) {
         rootEle.removeChild(rootEle.firstChild);
     }
-
-    const availableCanvasIds = ["test-canvas-id", "test-canvas-id-2"]; // TODO: fetch this from the server
 
     const elementList = [];
 
@@ -29,6 +45,10 @@ const renderDOM = (wsClient: WsClient) => {
         ele.setAttribute("id", `canvas-button-${id}`);
         ele.classList.add("canvas-button");
         ele.textContent = id;
+        ele.addEventListener("click", () => {
+            window.history.pushState("", "", `/canvas/${id}`);
+            router.matchUrl();
+        });
         canvasButtonContainer.appendChild(ele);
     });
     elementList.push(canvasButtonContainer);

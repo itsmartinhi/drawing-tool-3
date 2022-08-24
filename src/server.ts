@@ -13,9 +13,16 @@ app.use("/static", express.static(path.join(__dirname, "../frontend/static")));
 //     res.send(`Ich bin eine Canvasseite mit der ID: ${id}!`)
 // })
 
+app.get('/api/canvasIds', (req, res) => {
+    const ids = canvasStore.getStorage().map((canvas: Canvas) => {
+        return canvas.id;
+    });
+
+    res.json({ canvasIds: ids });
+})
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
-    // res.send(`Ich bin eine Übersichtsseite`)
 })
 
 const server = http.createServer(app);
@@ -35,7 +42,6 @@ wsServer.on("connection", socket => {
     socket.on("message", rawData => {
         const data = JSON.parse(String(rawData));
         parseWsData(data, socket);
-        // socket.send(JSON.stringify(data));
     });
 
     socket.on("open", () => {
@@ -67,6 +73,10 @@ class Canvas {
 class AbstractStore {
     private storage: Array<any> = [];
 
+    public getStorage() {
+        return this.storage;
+    }
+
     public add(item: any): void {
         this.storage.push(item);
     }
@@ -81,7 +91,7 @@ class AbstractStore {
 
         // log error if no canvas with the id exists
         if (!selectedItem) {
-            console.error(`Client Registration failed. Client with id ${id}) does not exist.`);
+            console.error(`Client Registration failed.`);
             return;
         }
 
@@ -91,29 +101,6 @@ class AbstractStore {
 
 
 class ClientStore extends AbstractStore {
-    // private storage: Array<Client> = [];
-
-    // public add(client: Client): void {
-    //     this.storage.push(client);
-    // }
-
-    // public getById(id: string): Client {
-    //     let selectedClient: Client;
-    //     this.storage.forEach(client => {
-    //         if (client.id === id) {
-    //             selectedClient = client;
-    //         }
-    //     });
-
-    //     // log error if no canvas with the id exists
-    //     if (!selectedClient) {
-    //         console.error(`Client Registration failed. Client with id ${id}) does not exist.`);
-    //         return;
-    //     }
-
-    //     return selectedClient;
-    // }
-
     public add(client: Client): void {
         return super.add(client);
     }
@@ -139,16 +126,7 @@ const canvasStore = new CanvasStore();
 const parseWsData = (data, socket) => {
     switch (data.type) {
         case "CreateCanvas": {
-            const id = randomUUID();
-            canvasStore.add(new Canvas(id));
-            console.log("Added new canvas with id: ", id);
-
-            // notify the client that the canvas has been created
-            const msg = {
-                type: "CreateCanvasComplete",
-                canvasId: id,
-            }
-            socket.send(JSON.stringify(msg));
+            createCanvas(socket);
             break;
         }
 
@@ -167,6 +145,16 @@ const parseWsData = (data, socket) => {
             selectedCanvas.unregisterClient(selectedClient);
             break;
         }
+
+        // case "GetCanvasIds": {
+        //     socket.send(JSON.stringify({
+        //         type: "GetCanvasIds",
+        //         canvasIds: canvasStore.getStorage().map((canvas: Canvas) => {
+        //             return canvas.id;
+        //         })
+        //     }));
+        //     break;
+        // }
 
         default:
             console.error(`Unknown Message with type ${data.type}.`)
@@ -188,3 +176,16 @@ const createClient = (socket) => {
 
     socket.send(JSON.stringify(message));
 };
+
+const createCanvas = (socket) => {
+    const id = randomUUID();
+    canvasStore.add(new Canvas(id));
+    console.log("Added new canvas with id: ", id);
+
+    // notify the client that the canvas has been created
+    const msg = {
+        type: "CreateCanvasComplete",
+        canvasId: id,
+    }
+    socket.send(JSON.stringify(msg));
+}

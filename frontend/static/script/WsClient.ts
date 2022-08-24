@@ -16,4 +16,16 @@ export default class WsClient {
             canvasId,
         }));
     }
+
+    public unregisterClientForCanvas(clientId: string, canvasId: string): void {
+        this.socket.send(this.prepareMessage({
+            type: "UnregisterForCanvas",
+            clientId,
+            canvasId,
+        }));
+    }
+
+    public getCanvasIds(): void {
+        this.socket.send(this.prepareMessage({ type: "GetCanvasIds" }));
+    }
 }

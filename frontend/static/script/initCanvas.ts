@@ -4,9 +4,10 @@ import { SelectorFactory, ToolArea } from "./ToolArea.js";
 import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
 import WsClient from "./WsClient.js";
+import Router from "./Router.js";
 
-export default function initCanvas(wsClient: WsClient, canvasId: string) {
-    buildDOM();
+export default function initCanvas(wsClient: WsClient, canvasId: string, router: Router) {
+    buildDOM(wsClient, canvasId, router);
 
     // register client for canvas
     wsClient.registerClientForCanvas(wsClient.clientId, canvasId);
@@ -74,7 +75,7 @@ export default function initCanvas(wsClient: WsClient, canvasId: string) {
     canvas.draw();
 }
 
-function buildDOM() {
+function buildDOM(wsClient: WsClient, canvasId: string, router: Router) {
     const rootEle = document.getElementById("root");
 
     // reset the dom
@@ -83,6 +84,17 @@ function buildDOM() {
     }
 
     const elementList = [];
+
+    // back to overview button
+    const backButtonEle = document.createElement("div");
+    backButtonEle.textContent = "Back to Overview";
+    backButtonEle.classList.add("canvas-back-button");
+    backButtonEle.addEventListener("click", () => {
+        window.history.pushState("", "", "/");
+        router.matchUrl();
+        wsClient.unregisterClientForCanvas(wsClient.clientId, canvasId);
+    });
+    elementList.push(backButtonEle);
 
     // info text
     const infoElement = document.createElement('p');

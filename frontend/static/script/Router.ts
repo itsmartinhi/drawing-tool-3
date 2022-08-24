@@ -20,9 +20,9 @@ export default class Router {
         // greater 0 because the first urlPart is the domain
         if (canvasIndex > 0 && urlParts[canvasIndex + 1]) {
             const canvasId = urlParts[canvasIndex + 1];
-            return initCanvas(this.wsClient, canvasId);
+            return initCanvas(this.wsClient, canvasId, this);
         }
 
-        return initOverview(this.wsClient);
+        return initOverview(this.wsClient, this);
     }
 }
