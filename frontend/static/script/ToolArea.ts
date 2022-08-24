@@ -1,6 +1,7 @@
 import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
-import { SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
+import { AddShapeEvent, SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
+import { Point2D, Vector } from "./Shapes.js";
 import { ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 import WsClient from "./WsClient.js";
 
@@ -42,9 +43,53 @@ export class SelectorFactory implements ToolFactory {
     public label: string = "Auswahl";
     private pressedKeys: Set<number> = new Set([]);
 
+    // drag and drop stuff
+    isDragging: boolean = false;
+    selectedShapes = [];
+    dragFromPoint: Point2D;
+    dragToPoint: Point2D;
+
     handleMouseUp(x: number, y: number) {
         let resetCanvas = true;
         let selectableShapeIds = this.shapeManager.getShapeIdsAtPoint(x, y); // todo: consider making this a Set
+
+        // sadly i could not make this work in time
+        // if (this.isDragging) {
+        //     this.dragToPoint = new Point2D(x, y);
+
+        //     const translateVector = new Vector(
+        //         this.dragToPoint.x - this.dragFromPoint.x,
+        //         this.dragToPoint.y - this.dragFromPoint.y
+        //     );
+
+        //     console.log(this.selectedShapes);
+
+        //     // translate the shapes
+        //     this.selectedShapes.forEach((shape) => {
+        //         // remove shape
+
+        //         // add new shape
+        //         // const shape = this.shapeManager.getShapeById(id);
+
+        //         // @ts-ignore
+        //         shape.from?.x + translateVector.x;
+        //         // @ts-ignore
+        //         shape.to?.x + translateVector.x;
+        //         // @ts-ignore
+        //         shape.from?.y + translateVector.y;
+        //         // @ts-ignore
+        //         shape.to?.y + translateVector.y;
+
+        //         const addEvent = new AddShapeEvent(shape.type, shape.id, { ...shape });
+        //         this.eventManager.pushEvent(addEvent);
+        //     });
+        //     this.shapeManager.draw();
+
+        //     // reset
+        //     this.selectedShapes = [];
+        //     this.isDragging = false;
+        //     // return;
+        // }
 
         if (this.isCtrlPressed()) {
             resetCanvas = false;
@@ -91,11 +136,20 @@ export class SelectorFactory implements ToolFactory {
     }
 
     handleMouseMove(x: number, y: number) {
-        return // do nothing since everything gets handled on mouse up
+        if (this.isDragging) {
+            // console.log(x, y);
+        }
+        return
     }
 
     handleMouseDown(x: number, y: number) {
-        return // do nothing since everything gets handled on mouse up
+        this.shapeManager.getSelectedShapeIds().forEach(id => {
+            const shape = this.shapeManager.getShapeById(id);
+            this.selectedShapes.push(shape);
+        });
+        this.dragFromPoint = new Point2D(x, y);
+        this.isDragging = true;
+        return
     }
 
     handleKeyDown(keyCode: number) {

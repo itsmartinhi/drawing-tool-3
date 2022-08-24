@@ -5,11 +5,11 @@ import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 import EventManager from "./events/EventManager.js";
 import WsClient from './WsClient.js';
 
-class Point2D {
+export class Point2D {
     constructor(readonly x: number, readonly y: number) { }
 }
 
-class Vector extends Point2D { }
+export class Vector extends Point2D { }
 
 class AbstractShape {
     private static counter: number = 0;

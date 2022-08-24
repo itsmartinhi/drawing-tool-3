@@ -182,6 +182,10 @@ export class Canvas implements ShapeManager {
 
     // shape selection
 
+    getShapeById(id: string): Shape {
+        return this.shapes[id];
+    }
+
     getShapeIdsAtPoint(x: number, y: number): string[] {
         const Ids = [];
 
