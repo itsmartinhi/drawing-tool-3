@@ -44,38 +44,132 @@ wsServer.on("connection", socket => {
 });
 
 class Client {
-    constructor(public id: string) { }
-
-    private registeredCanvases: Set<Canvas> = new Set();
-
-    public registerCanvas
+    constructor(readonly id: string, readonly ws: WebSocket) { }
 }
 class Canvas {
     constructor(public id: string) { }
+
+    private registeredClients: Set<Client> = new Set();
+
+    public getRegisteredClients() {
+        return this.registeredClients;
+    }
+
+    public registerClient(client: Client) {
+        this.registeredClients.add(client);
+    }
+
+    public unregisterClient(client: Client) {
+        this.registeredClients.delete(client); // return bool whether there was actually something deleted
+    }
 }
 
-const clientStore: Array<Client> = [];
-const canvasStore: Array<Canvas> = [];
+class AbstractStore {
+    private storage: Array<any> = [];
+
+    public add(item: any): void {
+        this.storage.push(item);
+    }
+
+    public getById(id: any): any {
+        let selectedItem;
+        this.storage.forEach(item => {
+            if (item.id === id) {
+                selectedItem = item;
+            }
+        });
+
+        // log error if no canvas with the id exists
+        if (!selectedItem) {
+            console.error(`Client Registration failed. Client with id ${id}) does not exist.`);
+            return;
+        }
+
+        return selectedItem;
+    }
+}
+
+
+class ClientStore extends AbstractStore {
+    // private storage: Array<Client> = [];
+
+    // public add(client: Client): void {
+    //     this.storage.push(client);
+    // }
+
+    // public getById(id: string): Client {
+    //     let selectedClient: Client;
+    //     this.storage.forEach(client => {
+    //         if (client.id === id) {
+    //             selectedClient = client;
+    //         }
+    //     });
+
+    //     // log error if no canvas with the id exists
+    //     if (!selectedClient) {
+    //         console.error(`Client Registration failed. Client with id ${id}) does not exist.`);
+    //         return;
+    //     }
+
+    //     return selectedClient;
+    // }
+
+    public add(client: Client): void {
+        return super.add(client);
+    }
+
+    public getById(id: string): Client {
+        return super.getById(id);
+    }
+}
+
+class CanvasStore extends AbstractStore {
+    public add(canvas: Canvas): void {
+        return super.add(canvas);
+    }
+
+    public getById(id: string): Canvas {
+        return super.getById(id);
+    }
+}
+
+const clientStore = new ClientStore();
+const canvasStore = new CanvasStore();
 
 const parseWsData = (data, socket) => {
     switch (data.type) {
-        case "CreateCanvas":
+        case "CreateCanvas": {
             const id = randomUUID();
-            canvasStore.push(new Canvas(id));
+            canvasStore.add(new Canvas(id));
             console.log("Added new canvas with id: ", id);
 
-            const message = {
+            // notify the client that the canvas has been created
+            const msg = {
                 type: "CreateCanvasComplete",
                 canvasId: id,
             }
-            socket.send(JSON.stringify(message));
+            socket.send(JSON.stringify(msg));
             break;
+        }
 
-        case "RegisterForCanvas":
-            // search for client and canvas with matching id
-            console.log(data);
+        case "RegisterForCanvas": {
+            const selectedCanvas = canvasStore.getById(data.canvasId);
+            const selectedClient = clientStore.getById(data.clientId);
+
+            selectedCanvas.registerClient(selectedClient);
+            break;
+        }
+
+        case "UnregisterForCanvas": {
+            const selectedCanvas = canvasStore.getById(data.canvasId);
+            const selectedClient = clientStore.getById(data.clientId);
+
+            selectedCanvas.unregisterClient(selectedClient);
+            break;
+        }
 
         default:
+            console.error(`Unknown Message with type ${data.type}.`)
             break;
     }
 }
@@ -84,8 +178,8 @@ const createClient = (socket) => {
     const id = randomUUID();
     console.log("Created new client with id: ", id)
 
-    const client = new Client(id);
-    clientStore.push(client);
+    const client = new Client(id, socket);
+    clientStore.add(client);
 
     const message = {
         type: "InitClient",
