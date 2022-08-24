@@ -182,6 +182,10 @@ export class Canvas implements ShapeManager {
 
     // shape selection
 
+    getShapeById(id: string): Shape {
+        return this.shapes[id];
+    }
+
     getShapeIdsAtPoint(x: number, y: number): string[] {
         const Ids = [];
 
@@ -229,38 +233,56 @@ export class Canvas implements ShapeManager {
     // color
     setOutlineColorForSelectedShapes(color: Color, redraw?: boolean): this {
         this.selectedShapeIds.forEach((id) => {
-            this.shapes[id].outlineColor = color;
-        });
-        return redraw ? this.draw() : this;
+            const shape = this.shapes[id];
 
-        // TODO: make this work
-        // this.selectedShapeIds.forEach((id) => {
-        //     const shape = this.shapes[id];
-        //     shape.outlineColor = color;
-        //     this.eventManager.pushEvent(new RemoveShapeWithIdEvent(id));
-        //     this.eventManager.pushEvent(new AddShapeEvent(
-        //         shape.type,
-        //         shape.id,
-        //         {
-        //             ...shape
-        //             // to: shape.to,
-        //             // from: shape.from,
-        //             // p1: shape.p1,
-        //             // p2: shape.p2,
-        //             // p3: shape.p3,
-        //             // fillColor: shape.fillColor,
-        //             // outlineColor: color
-        //         }
-        //     ));
-        // });
-        // return this.draw();
+            if (!!shape) {
+                shape.outlineColor = color;
+
+                // remove old shape
+                const removeEvent = new RemoveShapeWithIdEvent(id);
+                this.eventManager.pushEvent(removeEvent);
+
+                // add new one with different color
+                const addEvent = new AddShapeEvent(
+                    shape.type,
+                    shape.id,
+                    { ...shape }
+                );
+                this.eventManager.pushEvent(addEvent);
+
+                // push events to server
+                this.wsClient.addCanvasEvent(this.canvasId, removeEvent);
+                this.wsClient.addCanvasEvent(this.canvasId, addEvent);
+            }
+        });
+        return this.draw();
     }
 
     setFillColorForSelectedShapes(color: Color, redraw?: boolean): this {
         this.selectedShapeIds.forEach((id) => {
-            this.shapes[id].fillColor = color;
+            const shape = this.shapes[id];
+
+            if (!!shape) {
+                shape.fillColor = color;
+
+                // remove old shape
+                const removeEvent = new RemoveShapeWithIdEvent(id);
+                this.eventManager.pushEvent(removeEvent);
+
+                // add new one with different color
+                const addEvent = new AddShapeEvent(
+                    shape.type,
+                    shape.id,
+                    { ...shape }
+                );
+                this.eventManager.pushEvent(addEvent);
+
+                // push events to server
+                this.wsClient.addCanvasEvent(this.canvasId, removeEvent);
+                this.wsClient.addCanvasEvent(this.canvasId, addEvent);
+            }
         });
-        return redraw ? this.draw() : this;
+        return this.draw();
     }
 
     // move

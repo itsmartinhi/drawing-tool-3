@@ -37,6 +37,9 @@ export default function initCanvas(wsClient: WsClient, canvasId: string, router:
         removeShapeWithId(id, rd) {
             return canvas.removeShapeWithId(id, rd);
         },
+        getShapeById(id) {
+            return canvas.getShapeById(id);
+        },
         getShapeIdsAtPoint(x, y) {
             return canvas.getShapeIdsAtPoint(x, y);
         },

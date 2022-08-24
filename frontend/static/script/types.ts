@@ -26,6 +26,8 @@ export interface ShapeManager {
     removeShape(shape: Shape, redraw?: boolean): this;
     removeShapeWithId(id: string, redraw?: boolean): this;
 
+    getShapeById(id): Shape;
+
     // shape selection
     getShapeIdsAtPoint(x: number, y: number): string[];
     selectShapeWithId(id: string, redraw?: boolean): this; // TODO: think about whether the redraw param is even needed

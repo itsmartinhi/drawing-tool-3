@@ -5,11 +5,11 @@ import { Shape, ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
 import EventManager from "./events/EventManager.js";
 import WsClient from './WsClient.js';
 
-class Point2D {
+export class Point2D {
     constructor(readonly x: number, readonly y: number) { }
 }
 
-class Vector extends Point2D { }
+export class Vector extends Point2D { }
 
 class AbstractShape {
     private static counter: number = 0;
@@ -137,8 +137,12 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 }
 export class Circle extends AbstractShape implements Shape {
     public type = "circle";
-    constructor(readonly clientId: string, readonly center: Point2D, readonly radius: number) {
+    public center: Point2D;
+    public radius: number;
+    constructor(readonly clientId: string, readonly from: Point2D, readonly to: Point2D) {
         super(clientId);
+        this.center = from;
+        this.radius = CircleFactory.computeRadius(from, to.x, to.y);
     }
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
         ctx.strokeStyle = this.outlineColor.getRGBAString();
@@ -173,10 +177,10 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
     }
 
     createShape(from: Point2D, to: Point2D): Circle {
-        return new Circle(this.wsClient.clientId, from, CircleFactory.computeRadius(from, to.x, to.y));
+        return new Circle(this.wsClient.clientId, from, to);
     }
 
-    private static computeRadius(from: Point2D, x: number, y: number): number {
+    public static computeRadius(from: Point2D, x: number, y: number): number {
         const xDiff = (from.x - x),
             yDiff = (from.y - y);
         return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
