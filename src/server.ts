@@ -134,7 +134,7 @@ const parseWsData = (data, socket) => {
             const selectedCanvas = canvasStore.getById(data.canvasId);
             const selectedClient = clientStore.getById(data.clientId);
 
-            selectedCanvas.registerClient(selectedClient);
+            selectedCanvas?.registerClient(selectedClient);
             break;
         }
 
@@ -142,7 +142,7 @@ const parseWsData = (data, socket) => {
             const selectedCanvas = canvasStore.getById(data.canvasId);
             const selectedClient = clientStore.getById(data.clientId);
 
-            selectedCanvas.unregisterClient(selectedClient);
+            selectedCanvas?.unregisterClient(selectedClient);
             break;
         }
 

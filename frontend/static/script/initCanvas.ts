@@ -96,6 +96,11 @@ function buildDOM(wsClient: WsClient, canvasId: string, router: Router) {
     });
     elementList.push(backButtonEle);
 
+    // render client and canvas id
+    const idEle = document.createElement("div");
+    idEle.textContent = `CLIENT-ID: ${wsClient.clientId}CANVAS-ID: ${canvasId}`;
+    elementList.push(idEle);
+
     // info text
     const infoElement = document.createElement('p');
     infoElement.textContent = `Wählen Sie auf der linken Seite Ihr Zeichwerkzeug aus.

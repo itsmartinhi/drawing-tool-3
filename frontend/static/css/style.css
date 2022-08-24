@@ -134,6 +134,7 @@ body {
 }
 
 #add-canvas-button {
+    cursor: pointer;
     text-align: center;
     color: white;
     font-weight: 600;
@@ -143,4 +144,17 @@ body {
     border-radius: 10px;
     background-color: tomato;
     border: solid 2px transparent;
+}
+
+#add-canvas-button:hover {
+    cursor: pointer;
+    text-align: center;
+    color: tomato;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    background-color: rgba(255, 99, 71, 0.3);
+    border: solid 2px tomato;
 }
