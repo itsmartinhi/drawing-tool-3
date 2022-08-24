@@ -3,9 +3,13 @@ import { CircleFactory, LineFactory, RectangleFactory, TriangleFactory } from ".
 import { SelectorFactory, ToolArea } from "./ToolArea.js";
 import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
+import WsClient from "./WsClient.js";
 
-export default function initCanvas() {
+export default function initCanvas(wsClient: WsClient, canvasId: string) {
     buildDOM();
+
+    // register client for canvas
+    wsClient.registerClientForCanvas(wsClient.clientId, canvasId);
 
     const canvasDomElm = document.getElementById("drawArea") as HTMLCanvasElement;
     const menu = document.getElementsByClassName("tools");
@@ -71,6 +75,13 @@ export default function initCanvas() {
 }
 
 function buildDOM() {
+    const rootEle = document.getElementById("root");
+
+    // reset the dom
+    while (rootEle.firstChild) {
+        rootEle.removeChild(rootEle.firstChild);
+    }
+
     const elementList = [];
 
     // info text
@@ -118,7 +129,6 @@ function buildDOM() {
     elementList.push(eventStreamContainer);
 
     // add everything to the root element
-    const rootEle = document.getElementById("root")
     elementList.forEach(element => {
         rootEle.appendChild(element);
     });

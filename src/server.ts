@@ -25,36 +25,72 @@ server.listen(port);
 
 // WEBSOCKET SERVER
 const WS = require("ws")
-const cryptoLib = require("crypto")
+const { randomUUID } = require("crypto")
 const wsServer = new WS.Server({ port: "5000" });
 
 wsServer.on("connection", socket => {
+
+    createClient(socket);
+
     socket.on("message", rawData => {
         const data = JSON.parse(String(rawData));
-        console.log(data);
-        parseWsData(data);
+        parseWsData(data, socket);
         // socket.send(JSON.stringify(data));
     });
 
-    socket.on("open")
+    socket.on("open", () => {
+
+    });
 });
 
+class Client {
+    constructor(public id: string) { }
+
+    private registeredCanvases: Set<Canvas> = new Set();
+
+    public registerCanvas
+}
 class Canvas {
-    constructor(public id) { }
+    constructor(public id: string) { }
 }
 
+const clientStore: Array<Client> = [];
 const canvasStore: Array<Canvas> = [];
 
-const parseWsData = (data) => {
+const parseWsData = (data, socket) => {
     switch (data.type) {
-        case "AddCanvas":
-            const id = cryptoLib.randomBytes(20).toString('hex'); // TODO: check if id exists already and choose a new one
+        case "CreateCanvas":
+            const id = randomUUID();
             canvasStore.push(new Canvas(id));
             console.log("Added new canvas with id: ", id);
+
+            const message = {
+                type: "CreateCanvasComplete",
+                canvasId: id,
+            }
+            socket.send(JSON.stringify(message));
             break;
 
+        case "RegisterForCanvas":
+            // search for client and canvas with matching id
+            console.log(data);
 
         default:
             break;
     }
 }
+
+const createClient = (socket) => {
+    const id = randomUUID();
+    console.log("Created new client with id: ", id)
+
+    const client = new Client(id);
+    clientStore.push(client);
+
+    const message = {
+        type: "InitClient",
+        id: client.id
+    };
+
+    socket.send(JSON.stringify(message));
+};
