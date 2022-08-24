@@ -1,43 +1,19 @@
+import EventManager from "./events/EventManager.js";
 import Router from "./Router.js";
 import WsClient from "./WsClient.js";
 
-const initRouter = (wsClient: WsClient) => {
+const initRouter = (wsClient: WsClient, eventManager: EventManager) => {
     // create router instance
-    const router = new Router(wsClient);
+    const router = new Router(wsClient, eventManager);
 
     // initially match the url
     router.matchUrl();
     return router;
 };
 
-
-// function makeRequest() {
-//     const httpRequest = new XMLHttpRequest();
-
-//     if (!httpRequest) {
-//         alert('Giving up :( Cannot create an XMLHTTP instance');
-//         return false;
-//     }
-//     httpRequest.onreadystatechange = alertContents.bind(this, httpRequest);
-//     httpRequest.open('GET', '/canvasIds');
-//     httpRequest.send();
-// }
-
-// function alertContents(httpRequest) {
-//     if (httpRequest.readyState === XMLHttpRequest.DONE) {
-//         if (httpRequest.status === 200) {
-//             alert(httpRequest.responseText);
-//         } else {
-//             alert('There was a problem with the request.');
-//         }
-//     }
-// }
-
-
 function initApp() {
     let router: Router;
-
-    // makeRequest();
+    const eventManager = new EventManager();
 
     const socket = new WebSocket("ws://localhost:5000");
     socket.onmessage = ({ data: rawData }) => {
@@ -47,7 +23,7 @@ function initApp() {
         switch (data.type) {
             case "InitClient":
                 const wsClient = new WsClient(data.id, socket);
-                router = initRouter(wsClient);
+                router = initRouter(wsClient, eventManager);
                 break;
 
             case "CreateCanvasComplete":
@@ -59,17 +35,13 @@ function initApp() {
                 router.matchUrl()
                 break;
 
-            case "CreateCanvasComplete":
-                window.history.pushState("", "", "/canvas/" + data.canvasId);
-                if (!router) {
-                    console.error("router not initialized");
-                    break;
-                }
-                router.matchUrl()
-                break;
-
-            // case "GetCanvasListResponse":
-
+            case "AddCanvasEvent":
+                console.log("recieved event ", data.event);
+                eventManager.pushEvent(data.event);
+                // @ts-ignore
+                console.log(eventManager.draw)
+                // @ts-ignore
+                eventManager.draw();
 
             default:
                 break;

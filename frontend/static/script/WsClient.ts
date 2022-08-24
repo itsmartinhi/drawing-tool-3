@@ -1,5 +1,7 @@
+import { IEvent } from "./types.js";
+
 export default class WsClient {
-    constructor(readonly clientId: string, private socket: WebSocket) { }
+    constructor(readonly clientId: string, readonly socket: WebSocket) { }
 
     private prepareMessage(msg): string {
         return JSON.stringify(msg);
@@ -27,5 +29,14 @@ export default class WsClient {
 
     public getCanvasIds(): void {
         this.socket.send(this.prepareMessage({ type: "GetCanvasIds" }));
+    }
+
+    public addCanvasEvent(canvasId: string, event: IEvent): void {
+        this.socket.send(this.prepareMessage({
+            type: "AddCanvasEvent",
+            clientId: this.clientId,
+            canvasId,
+            event
+        }));
     }
 }

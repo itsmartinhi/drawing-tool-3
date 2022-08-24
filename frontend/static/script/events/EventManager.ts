@@ -1,11 +1,18 @@
-import { IEvent } from "../types";
+import { IEvent } from "../types.js";
+import WsClient from "../WsClient.js";
 
 class EventManager {
+
+    // constructor(readonly wsClient: WsClient, readonly canvasId: string) { }
+
     private eventStream: Array<IEvent> = [];
 
     public pushEvent(event: IEvent) {
         this.eventStream.push(event);
         this.updateEventstreamDisplay();
+
+        // push event to server
+        // this.wsClient.addCanvasEvent(this.canvasId, event);
     }
 
     public getEventStream(): Array<IEvent> {

@@ -10,7 +10,7 @@ export interface IEvent {
 }
 
 export interface Shape {
-    readonly id: number;
+    readonly id: string;
     readonly type: string;
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean);
     isPointInShapeArea(x: number, y: number);

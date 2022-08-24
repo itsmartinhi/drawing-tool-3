@@ -2,6 +2,7 @@ import { Canvas } from "./Canvas.js";
 import EventManager from "./events/EventManager.js";
 import { SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
 import { ShapeFactory, ShapeManager, ToolFactory } from "./types.js";
+import WsClient from "./WsClient.js";
 
 export class ToolArea {
     private selectedShape: ShapeFactory = undefined;
@@ -36,7 +37,7 @@ export class ToolArea {
 export class SelectorFactory implements ToolFactory {
 
     // add shapemanager to be able to manipulate the shapes on the canvas
-    constructor(private shapeManager: ShapeManager, readonly eventManager: EventManager) { }
+    constructor(private shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient) { }
 
     public label: string = "Auswahl";
     private pressedKeys: Set<number> = new Set([]);
@@ -48,6 +49,8 @@ export class SelectorFactory implements ToolFactory {
         if (this.isCtrlPressed()) {
             resetCanvas = false;
         }
+
+        console.log(selectableShapeIds);
 
         // TODO: cycling through does not work 100% because of the mechanic with getting the selected IDs
         if (this.isAltPressed()) {

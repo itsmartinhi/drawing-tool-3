@@ -6,7 +6,7 @@ import EventManager from "./events/EventManager.js";
 import WsClient from "./WsClient.js";
 import Router from "./Router.js";
 
-export default function initCanvas(wsClient: WsClient, canvasId: string, router: Router) {
+export default function initCanvas(wsClient: WsClient, canvasId: string, router: Router, eventManager: EventManager) {
     buildDOM(wsClient, canvasId, router);
 
     // register client for canvas
@@ -21,7 +21,9 @@ export default function initCanvas(wsClient: WsClient, canvasId: string, router:
     // selected.
     // Anyway, we do not want the two to have references on each other
     let canvas: Canvas;
-    const em: EventManager = new EventManager();
+    // @ts-ignore
+    eventManager.draw = () => { canvas.draw() };
+    const em = eventManager;
     const sm: ShapeManager = {
         draw() {
             return canvas.draw();
@@ -64,14 +66,14 @@ export default function initCanvas(wsClient: WsClient, canvasId: string, router:
         },
     };
     const shapesSelector: ShapeFactory[] = [
-        new LineFactory(sm, em),
-        new CircleFactory(sm, em),
-        new RectangleFactory(sm, em),
-        new TriangleFactory(sm, em),
-        new SelectorFactory(sm, em),
+        new LineFactory(sm, em, wsClient, canvasId),
+        new CircleFactory(sm, em, wsClient, canvasId),
+        new RectangleFactory(sm, em, wsClient, canvasId),
+        new TriangleFactory(sm, em, wsClient),
+        new SelectorFactory(sm, em, wsClient),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-    canvas = new Canvas(canvasDomElm, toolArea, em, sm);
+    canvas = new Canvas(canvasDomElm, toolArea, em, sm, wsClient, canvasId);
     canvas.draw();
 }
 
@@ -98,7 +100,7 @@ function buildDOM(wsClient: WsClient, canvasId: string, router: Router) {
 
     // render client and canvas id
     const idEle = document.createElement("div");
-    idEle.textContent = `CLIENT-ID: ${wsClient.clientId}CANVAS-ID: ${canvasId}`;
+    idEle.textContent = `CLIENT-ID: ${wsClient.clientId} | CANVAS-ID: ${canvasId}`;
     elementList.push(idEle);
 
     // info text

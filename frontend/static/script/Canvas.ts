@@ -5,6 +5,7 @@ import Color from "./Color.js";
 import EventManager from "./events/EventManager.js";
 import { AddShapeEvent, RemoveShapeWithIdEvent, SelectShapeEvent, UnselectShapeEvent } from "./events/events.js";
 import { Circle, CircleFactory, Line, LineFactory, Rectangle, RectangleFactory, Triangle, TriangleFactory } from "./Shapes.js";
+import WsClient from "./WsClient.js";
 
 export class Canvas implements ShapeManager {
     private ctx: CanvasRenderingContext2D;
@@ -16,7 +17,7 @@ export class Canvas implements ShapeManager {
     private height: number;
 
     constructor(canvasDomElement: HTMLCanvasElement,
-        toolarea: ToolArea, readonly eventManager: EventManager, readonly shapeManager: ShapeManager) {
+        toolarea: ToolArea, readonly eventManager: EventManager, readonly shapeManager: ShapeManager, readonly wsClient: WsClient, readonly canvasId: string) {
         const { width, height } = canvasDomElement.getBoundingClientRect();
         this.width = width;
         this.height = height;
@@ -118,20 +119,32 @@ export class Canvas implements ShapeManager {
                 let shape: Shape;
                 switch (shapeType) {
                     case "line":
-                        shape = new LineFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        shape = new LineFactory(this.shapeManager, this.eventManager, this.wsClient, this.canvasId).createShape(data.from, data.to);
                         break;
                     case "rectangle":
-                        shape = new RectangleFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        shape = new RectangleFactory(this.shapeManager, this.eventManager, this.wsClient, this.canvasId).createShape(data.from, data.to);
                         break;
                     case "circle":
-                        shape = new CircleFactory(this.shapeManager, this.eventManager).createShape(data.from, data.to);
+                        shape = new CircleFactory(this.shapeManager, this.eventManager, this.wsClient, this.canvasId).createShape(data.from, data.to);
                         break;
                     case "triangle":
-                        shape = new Triangle(data.p1, data.p2, data.p3);
+                        shape = new Triangle(this.wsClient.clientId, data.p1, data.p2, data.p3);
                         break;
                 }
-                shape.fillColor = data.fillColor ?? shape.fillColor;
-                shape.outlineColor = data.outlineColor ?? shape.outlineColor;
+
+                console.log(data.fillColor, data.outlineColor)
+                shape.fillColor = new Color(
+                    data.fillColor.r,
+                    data.fillColor.g,
+                    data.fillColor.b,
+                    data.fillColor.alpha,
+                ) ?? shape.fillColor;
+                shape.outlineColor = new Color(
+                    data.outlineColor.r,
+                    data.outlineColor.g,
+                    data.outlineColor.b,
+                    data.outlineColor.alpha,
+                ) ?? shape.outlineColor;
                 this.shapes[id] = shape;
             }
 
@@ -180,7 +193,7 @@ export class Canvas implements ShapeManager {
 
             // if the point is within the shape area, add it the the id list
             if (shape.isPointInShapeArea(x, y)) {
-                Ids.push(parseInt(id));
+                Ids.push(id);
             }
         }
 

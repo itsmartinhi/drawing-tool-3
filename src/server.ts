@@ -41,6 +41,7 @@ wsServer.on("connection", socket => {
 
     socket.on("message", rawData => {
         const data = JSON.parse(String(rawData));
+        console.log(">> WS: " + data.type);
         parseWsData(data, socket);
     });
 
@@ -54,6 +55,8 @@ class Client {
 }
 class Canvas {
     constructor(public id: string) { }
+
+    public eventStore: Array<object> = [];
 
     private registeredClients: Set<Client> = new Set();
 
@@ -143,6 +146,24 @@ const parseWsData = (data, socket) => {
             const selectedClient = clientStore.getById(data.clientId);
 
             selectedCanvas?.unregisterClient(selectedClient);
+            break;
+        }
+
+        case "AddCanvasEvent": {
+            const selectedCanvas = canvasStore.getById(data.canvasId);
+            const senderClientId = data.clientId;
+            selectedCanvas?.eventStore.push(data.event);
+
+            clientStore.getStorage().forEach((client: Client) => {
+                if (client.id !== senderClientId) {
+                    client.ws.send(JSON.stringify({
+                        type: "AddCanvasEvent",
+                        canvasId: data.canvasId,
+                        clientId: client.id,
+                        event: data.event
+                    }));
+                }
+            })
             break;
         }
 
