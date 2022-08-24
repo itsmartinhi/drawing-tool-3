@@ -33,7 +33,7 @@ server.listen(port);
 // WEBSOCKET SERVER
 const WS = require("ws")
 const { randomUUID } = require("crypto")
-const wsServer = new WS.Server({ port: "5000" });
+const wsServer = new WS.Server({ port: "3001" });
 
 wsServer.on("connection", socket => {
 
@@ -43,10 +43,6 @@ wsServer.on("connection", socket => {
         const data = JSON.parse(String(rawData));
         console.log(">> WS: " + data.type);
         parseWsData(data, socket);
-    });
-
-    socket.on("open", () => {
-
     });
 });
 
@@ -137,7 +133,17 @@ const parseWsData = (data, socket) => {
             const selectedCanvas = canvasStore.getById(data.canvasId);
             const selectedClient = clientStore.getById(data.clientId);
 
-            selectedCanvas?.registerClient(selectedClient);
+            if (!!selectedCanvas) {
+                selectedCanvas?.registerClient(selectedClient);
+                selectedCanvas.eventStore.forEach(event => {
+                    socket.send(JSON.stringify({
+                        type: "CanvasEventUpdate",
+                        canvasId: data.canvasId,
+                        clientId: data.clientId,
+                        event: event
+                    }));
+                });
+            }
             break;
         }
 

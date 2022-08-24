@@ -17,7 +17,7 @@ function initApp() {
     let canvasId: string;
     const eventManager = new EventManager();
 
-    const socket = new WebSocket("ws://localhost:5000");
+    const socket = new WebSocket("ws://localhost:3001");
     socket.onmessage = ({ data: rawData }) => {
         const data = JSON.parse(rawData);
         console.log("Message from server ", data);

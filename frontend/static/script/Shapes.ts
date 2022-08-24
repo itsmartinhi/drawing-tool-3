@@ -337,7 +337,7 @@ export class TriangleFactory implements ShapeFactory {
     private thirdPoint: Point2D;
     private tmpShape: Triangle;
 
-    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient) { }
+    constructor(readonly shapeManager: ShapeManager, readonly eventManager: EventManager, readonly wsClient: WsClient, readonly canvasId: string) { }
 
     handleMouseDown(x: number, y: number) {
         if (this.tmpShape) {
@@ -347,13 +347,15 @@ export class TriangleFactory implements ShapeFactory {
             const shape = new Triangle(this.wsClient.clientId, this.from, this.tmpTo, p3);
             // this.shapeManager.addShape(shape); // TODO: remove
 
-            this.eventManager.pushEvent(new AddShapeEvent(shape.type, shape.id.toString(), {
+            const event = new AddShapeEvent(shape.type, shape.id.toString(), {
                 p1: shape.p1,
                 p2: shape.p2,
                 p3: shape.p3,
                 fillColor: shape.fillColor,
                 outlineColor: shape.outlineColor,
-            }));
+            });
+            this.eventManager.pushEvent(event);
+            this.wsClient.addCanvasEvent(this.canvasId, event);
             this.shapeManager.draw();
 
             this.from = undefined;

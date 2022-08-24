@@ -69,7 +69,7 @@ export default function initCanvas(wsClient: WsClient, canvasId: string, router:
         new LineFactory(sm, em, wsClient, canvasId),
         new CircleFactory(sm, em, wsClient, canvasId),
         new RectangleFactory(sm, em, wsClient, canvasId),
-        new TriangleFactory(sm, em, wsClient),
+        new TriangleFactory(sm, em, wsClient, canvasId),
         new SelectorFactory(sm, em, wsClient, canvasId),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
@@ -138,13 +138,13 @@ function buildDOM(wsClient: WsClient, canvasId: string, router: Router) {
     eventStreamTextarea.setAttribute("cols", "100");
     eventStreamTextarea.setAttribute("rows", "10");
 
-    const eventStreamLoadButton = document.createElement('div');
-    eventStreamLoadButton.setAttribute("id", "load-events-button");
-    eventStreamLoadButton.textContent = "Load Events";
+    // const eventStreamLoadButton = document.createElement('div');
+    // eventStreamLoadButton.setAttribute("id", "load-events-button");
+    // eventStreamLoadButton.textContent = "Load Events";
 
     eventStreamContainer.appendChild(eventStreamHeader);
     eventStreamContainer.appendChild(eventStreamTextarea);
-    eventStreamContainer.appendChild(eventStreamLoadButton);
+    // eventStreamContainer.appendChild(eventStreamLoadButton);
     elementList.push(eventStreamContainer);
 
     // add everything to the root element
