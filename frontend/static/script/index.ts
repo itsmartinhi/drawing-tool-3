@@ -1,3 +1,4 @@
+import { Canvas } from './Canvas';
 import EventManager from "./events/EventManager.js";
 import Router from "./Router.js";
 import WsClient from "./WsClient.js";
@@ -13,6 +14,7 @@ const initRouter = (wsClient: WsClient, eventManager: EventManager) => {
 
 function initApp() {
     let router: Router;
+    let canvasId: string;
     const eventManager = new EventManager();
 
     const socket = new WebSocket("ws://localhost:5000");
@@ -32,16 +34,19 @@ function initApp() {
                     console.error("router not initialized");
                     break;
                 }
+
+                // update canvas id
+                canvasId = data.canvasId;
                 router.matchUrl()
                 break;
 
-            case "AddCanvasEvent":
+            case "CanvasEventUpdate":
                 console.log("recieved event ", data.event);
                 eventManager.pushEvent(data.event);
-                // @ts-ignore
-                console.log(eventManager.draw)
+
                 // @ts-ignore
                 eventManager.draw();
+                break;
 
             default:
                 break;

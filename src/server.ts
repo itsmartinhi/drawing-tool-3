@@ -157,7 +157,7 @@ const parseWsData = (data, socket) => {
             clientStore.getStorage().forEach((client: Client) => {
                 if (client.id !== senderClientId) {
                     client.ws.send(JSON.stringify({
-                        type: "AddCanvasEvent",
+                        type: "CanvasEventUpdate",
                         canvasId: data.canvasId,
                         clientId: client.id,
                         event: data.event
@@ -166,16 +166,6 @@ const parseWsData = (data, socket) => {
             })
             break;
         }
-
-        // case "GetCanvasIds": {
-        //     socket.send(JSON.stringify({
-        //         type: "GetCanvasIds",
-        //         canvasIds: canvasStore.getStorage().map((canvas: Canvas) => {
-        //             return canvas.id;
-        //         })
-        //     }));
-        //     break;
-        // }
 
         default:
             console.error(`Unknown Message with type ${data.type}.`)

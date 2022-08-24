@@ -70,7 +70,7 @@ export default function initCanvas(wsClient: WsClient, canvasId: string, router:
         new CircleFactory(sm, em, wsClient, canvasId),
         new RectangleFactory(sm, em, wsClient, canvasId),
         new TriangleFactory(sm, em, wsClient),
-        new SelectorFactory(sm, em, wsClient),
+        new SelectorFactory(sm, em, wsClient, canvasId),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
     canvas = new Canvas(canvasDomElm, toolArea, em, sm, wsClient, canvasId);

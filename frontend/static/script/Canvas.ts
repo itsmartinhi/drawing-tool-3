@@ -132,7 +132,7 @@ export class Canvas implements ShapeManager {
                         break;
                 }
 
-                console.log(data.fillColor, data.outlineColor)
+                // console.log(data.fillColor, data.outlineColor)
                 shape.fillColor = new Color(
                     data.fillColor.r,
                     data.fillColor.g,
@@ -218,7 +218,9 @@ export class Canvas implements ShapeManager {
 
     removeSelectedShapes(): this {
         this.selectedShapeIds.forEach((id) => {
-            this.eventManager.pushEvent(new RemoveShapeWithIdEvent(id));
+            const event = new RemoveShapeWithIdEvent(id);
+            this.eventManager.pushEvent(event);
+            this.wsClient.addCanvasEvent(this.canvasId, event)
             // this.removeShapeWithId(id, false);
         });
         return this.draw();

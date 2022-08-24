@@ -189,6 +189,7 @@ export class Rectangle extends AbstractShape implements Shape {
     }
 
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean) {
+
         ctx.strokeStyle = this.outlineColor.getRGBAString();
         ctx.fillStyle = this.fillColor.getRGBAString();
         ctx.beginPath();
